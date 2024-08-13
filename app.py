@@ -15,7 +15,7 @@ app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = 'peterodero561@gmail.com'
-app.config['MAIL_PASSWORD'] = 'Imlwwm22t@p'
+app.config['MAIL_PASSWORD'] = ''
 
 @app.route('/apply', methods=['POST', 'GET'], strict_slashes=False)
 def apply():
