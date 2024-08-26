@@ -12,7 +12,7 @@ app.secret_key = 'Peter 1234'
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = 'peterodero561@gmail.com'
-app.config['MAIL_PASSWORD'] = 'flzqlqkqujqcbbck'
+app.config['MAIL_PASSWORD'] = ''
 app.config['MAIL_USE_TSL'] = False
 app.config['MAIL_USE_SSL'] = True
 
