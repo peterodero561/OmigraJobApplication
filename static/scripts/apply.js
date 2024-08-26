@@ -20,8 +20,13 @@ window.onload = function () {
             });
 
             if (response.ok) {
-                alert('Application submitted successfully!');
+                alert('Application submitted');
+                console.log('Resetting form...');
+                await new Promise(resolve => setTimeout(resolve, 500));
                 event.target.reset();  // Clear the form
+                console.log('Form reset successfully, redirecting to home...');
+                // redirects to home page on successfull submission of application
+                window.location.href = '/';
             } else {
                 const errorText = await response.text();
                 alert(`Failed to submit application: ${errorText}`);
@@ -35,3 +40,13 @@ window.onload = function () {
         // alert('Application submitted successfully!');
     };
 };
+
+
+
+
+
+
+
+
+
+flzqlqkqujqcbbck
