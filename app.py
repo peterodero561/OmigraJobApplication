@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, flash
+from flask import Flask, render_template, redirect, flash, request
 from flask_mail import Mail, Message
 import os
 from flask_cors import CORS
@@ -7,15 +7,16 @@ from flask_cors import CORS
 app = Flask(__name__)
 app.secret_key = 'Peter 1234'
 
-# to interact with backend
-CORS(app)
 
 # Configure mail
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = 'peterodero561@gmail.com'
-app.config['MAIL_PASSWORD'] = ''
+app.config['MAIL_PASSWORD'] = 'flzqlqkqujqcbbck'
+app.config['MAIL_USE_TSL'] = False
+app.config['MAIL_USE_SSL'] = True
+
+mail = Mail(app)
 
 @app.route('/apply', methods=['POST', 'GET'], strict_slashes=False)
 def apply():
@@ -29,12 +30,12 @@ def apply():
 
         # Email
         if resume:
-            msg = Message(Subject=f'New Job Application from {name}',
-                    sender=email,
+            msg = Message(subject=f'New Job Application from {name}',
+                    sender='peterodero561@gmail.com',
                     recipients=['peterodero561@gmail.com'])
             msg.body = f"""
             Name: {name}
-            Email: [email]
+            Email: {email}
             Phone: {phone}
             Message: {message}
             """
