@@ -13,19 +13,25 @@
     <main>
         <section id="apply-section">
             <h2 id="job-title"></h2>
-            <form id="apply-form" enctype="multipart/form-data" method="post">
+            <form id="apply-form" enctype="multipart/form-data" method="post" action="/apply">
                 <label for="name">Name:</label>
                 <input type="text" id="name" name="name" required>
+
                 <label for="email">Email:</label>
                 <input type="email" id="email" name="email" required>
+
                 <label for="phone">Phone:</label>
                 <input type="tel" id="phone" name="phone" required>
+
                 <label for="message">Why do you want this job?</label>
                 <textarea id="message" name="message" rows="4" required></textarea>
+
                 <label for="resume">Upload Resume:</label>
                 <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx" required>
+
                 <label for="coverLetter">Upload Cover Letter:</label>
                 <input type="file" id="coverLetter" name="coverLetter" accept=".pdf,.doc,.docx">
+
                 <button type="submit">Submit Application</button>
             </form>
         </section>
@@ -33,6 +39,12 @@
     <footer>
         <p>Contact us: +97450075368 or 0741715502 | Email: absalomominde1@gmail.com</p>
     </footer>
-    <script src="../static/scripts/home.js"></script>
+    <script>
+        // Get the job title from localStorage
+        const jobTitle = localStorage.getItem('jobTitle');
+        
+        // Display the job title in the apply form
+        document.getElementById('job-title').textContent = jobTitle || 'Apply for Job';
+    </script>
 </body>
 </html>
