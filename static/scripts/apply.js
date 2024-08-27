@@ -40,13 +40,3 @@ window.onload = function () {
         // alert('Application submitted successfully!');
     };
 };
-
-
-
-
-
-
-
-
-
-flzqlqkqujqcbbck
