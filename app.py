@@ -1,14 +1,23 @@
 from flask import Flask, render_template, redirect, flash, request, url_for, session
 from flask_cors import CORS
+from flask_login import current_user, login_required
 from flask_mail import Mail, Message
 from flask_mysqldb import MySQL
 import os
 import MySQLdb.cursors
+from models.user import User
 import re
+from werkzeug.utils import secure_filename
+
+
 
 # create app
 app = Flask(__name__)
 app.secret_key = 'Peter 1234'
+
+# configure picture upload
+UPLOAD_FOLDER = 'static/images/'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
 # Configure mail
@@ -66,6 +75,7 @@ def apply():
 
 @app.route('/home', strict_slashes=False)
 def home():
+    user = User(id=session['id'], username=session['username'])
     return render_template('home.html')
 
 @app.route('/about', strict_slashes=False)
@@ -95,8 +105,9 @@ def login():
             session['loggedin'] = True
             session['id'] = account['id']
             session['username'] = account['username']
+            user = User(id=account['id'], username=account['username'], profile_pic=account.get('profile_pic'))
             msg = 'Logged in successfully !'
-            return render_template('home.html', msg = msg)
+            return render_template('home.html', msg = msg, user=user)
         else:
             msg = 'Incorrect username / password !'
     return render_template('login.html', msg = msg)
@@ -135,6 +146,33 @@ def register():
     elif request.method == 'POST':
         msg = 'Please fill out the form !'
     return render_template('register.html', msg = msg)
+
+
+@app.route('/upload', methods=['POST'])
+@login_required
+def upload_file():
+    if 'profile_pic' not in request.files:
+        return "No file part"
+    file = request.files['profile_pic']
+    if file.filename == '':
+        return "No selected file"
+    if file:
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+
+        # Update the user's profile picture path in the database
+        current_user.profile_pic = filepath
+        db.session.commit()
+        
+        return redirect(url_for('profile'))
+
+@app.route('/profile')
+@login_required
+def profile():
+    return render_template('profile.html', user=current_user)
+
+
 
 
 if __name__ == '__main__':
