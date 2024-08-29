@@ -99,3 +99,39 @@ footer {
     width: 100%;
     bottom: 0;
 }
+
+
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    width: 80px;
+    height: 80px;
+    justify-content: flex-start;
+    background-color: #ddd;
+    margin-left: 30px;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 50%;
+    display: block;
+}
+
+.heading {
+    width: 80%;  /* 80% width for heading */
+    text-align: center;
+    background-color: #0056b3;
+    margin-right: 90px;
+}
+
+.logout {
+    width: 5%;  /* 10% width for logout */
+    display: flex;
+    justify-content: flex-end;
+}
