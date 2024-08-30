@@ -3,8 +3,11 @@ from flask_cors import CORS
 from flask_login import current_user, login_required
 from flask_mail import Mail, Message
 from flask_mysqldb import MySQL
+from flask_sqlalchemy import SQLAlchemy
 import os
 import MySQLdb.cursors
+from models.db import db
+from models.job import Job
 from models.user import User
 import re
 from werkzeug.utils import secure_filename
@@ -30,13 +33,16 @@ app.config['MAIL_USE_SSL'] = True
 
 mail = Mail(app)
 
-# configure for MySQL
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'Peterodero561@'
-app.config['MYSQL_DB'] = 'omigra'
+# Configuration for the MySQL database
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:Peterodero561%40@localhost/omigra'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-mysql = MySQL(app)
+# Initialize the database with the app context
+db.init_app(app)
+
+with app.app_context():
+    db.create_all()  # Create tables if they don't exist
+
 
 @app.route('/apply', methods=['POST', 'GET'], strict_slashes=False)
 def apply():
@@ -75,8 +81,9 @@ def apply():
 
 @app.route('/home', strict_slashes=False)
 def home():
-    user = User(id=session['id'], username=session['username'])
-    return render_template('home.html')
+    user = User(id=session['id'], username=session['username'], email=session['email'], password=session['password'])
+    jobs = Job.query.all()
+    return render_template('home.html', jobs=jobs)
 
 @app.route('/about', strict_slashes=False)
 def about():
@@ -98,16 +105,16 @@ def login():
     if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
         username = request.form['username']
         password = request.form['password']
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM accounts WHERE username = % s AND password = % s', (username, password, ))
-        account = cursor.fetchone()
-        if account:
+        
+         # Query the user using SQLAlchemy
+        account = User.query.filter_by(username=username).first()
+
+        if account and account.check_password(password):
             session['loggedin'] = True
-            session['id'] = account['id']
-            session['username'] = account['username']
-            user = User(id=account['id'], username=account['username'], profile_pic=account.get('profile_pic'))
+            session['id'] = account.id
+            session['username'] = account.username
             msg = 'Logged in successfully !'
-            return render_template('home.html', msg = msg, user=user)
+            return render_template('home.html', msg = msg, user=account)
         else:
             msg = 'Incorrect username / password !'
     return render_template('login.html', msg = msg)
@@ -128,9 +135,10 @@ def register():
         username = request.form['username']
         password = request.form['password']
         email = request.form['email']
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM accounts WHERE username = % s', (username, ))
-        account = cursor.fetchone()
+
+         # Check if account exists using SQLAlchemy
+        account = User.query.filter_by(username=username).first()
+
         if account:
             msg = 'Account already exists !'
         elif not re.match(r'[^@]+@[^@]+\.[^@]+', email):
@@ -140,8 +148,10 @@ def register():
         elif not username or not password or not email:
             msg = 'Please fill out the form !'
         else:
-            cursor.execute('INSERT INTO accounts VALUES (NULL, % s, % s, % s)', (username, password, email, ))
-            mysql.connection.commit()
+            # Create a new user instance
+            new_user = User(username=username, password=password, email=email)
+            db.session.add(new_user)
+            db.session.commit()
             msg = 'You have successfully registered !'
     elif request.method == 'POST':
         msg = 'Please fill out the form !'
@@ -171,6 +181,27 @@ def upload_file():
 @login_required
 def profile():
     return render_template('profile.html', user=current_user)
+
+@app.route('/add-job', methods=['POST'])
+def add_job():
+    job_title = request.form['title']
+    job_description = request.form['description']
+    
+    new_job = Job(title=job_title, description=job_description)
+    db.session.add(new_job)
+    db.session.commit()
+    
+    return redirect('/home')
+
+
+@app.route('/delete-job/<int:id>', methods=['POST'])
+def delete_job(id):
+    job_to_delete = Job.query.get_or_404(id)
+    db.session.delete(job_to_delete)
+    db.session.commit()
+    
+    return redirect('/home')
+
 
 
 
