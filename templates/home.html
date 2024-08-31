@@ -8,18 +8,32 @@
 </head>
 <body>
     <header>
-        <h1>Omigra Enterprise Recruitment</h1>
-        <nav>
-            <ul>
-                <li><a href="/home">Home</a></li>
-                <li><a href="#jobs">Jobs</a></li>
-                <li><a href="/about">About Us</a></li>
-                <li><a href="/contact">Contact Us</a></li>
-            </ul>
-        </nav>
+        <div class="header-container">
+            <div class="user-info">
+                {% if user.profile_pic %}
+                    <img src="{{ url_for('static', filename=user.profile_pic) }}" alt="User Image" class="user-image">
+                {% else %}
+                    <img src="{{ url_for('static', filename='images/default-profile3.png') }}" alt="User Image" class="user-image">
+                {% endif %}
+            </div> 
+            
+                <div class="heading">
+                    <h1>Omigra Enterprise Recruitment</h1>
+                    <nav>
+                        <ul>
+                            <li><a href="/home">Home</a></li>
+                            <li><a href="#jobs">Jobs</a></li>
+                            <li><a href="/about">About Us</a></li>
+                            <li><a href="/contact">Contact Us</a></li>
+                        </ul>
+                    </nav>
+                </div>
+            
+        </div>
+
     </header>
-    <main>
-        <section id="jobs">
+    <main>       
+        <!-- <section id="jobs">
             <div class="job">
                 <h2>Cleaner</h2>
                 <p>Job Description: Responsible for maintaining cleanliness in the designated areas.</p>
@@ -50,7 +64,31 @@
                 <p>Job Description: Ensure the safety and security of the premises and personnel.</p>
                 <button onclick="applyForJob('Security')">Apply</button>
             </div>
+        </section> -->
+        <section id="jobs">
+            {% for job in jobs %}
+                <div class="job">
+                    <h2>{{ job.title }}</h2>
+                    <p>Job Description: {{ job.description }}</p>
+
+                    <!-- Edit Job Form -->
+                    <form action="/edit-job/{{ job.id }}" method="POST">
+                        <button type="submit">Edit</button>
+                    </form>
+
+                    <!-- Delete Job Form -->
+                    <form action="/delete-job/{{ job.id }}" method="POST">
+                        <button type="submit">Delete</button>
+                    </form>
+                    <button onclick="applyForJob('{{ job.title }}')">Apply</button>
+                </div>
+            {% endfor %}
         </section>
+        <form action="/add-job" method="POST" class="job-form">
+            <input type="text" name="title" placeholder="Job Title" required>
+            <textarea name="description" placeholder="Job Description" required></textarea>
+            <button type="submit">Add Job</button>
+        </form> 
     </main>
     <footer>
         <p>Contact us: +97450075368 or 0741715502 | Email: absalomominde1@gmail.com</p>
