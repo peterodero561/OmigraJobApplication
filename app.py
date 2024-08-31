@@ -81,9 +81,20 @@ def apply():
 
 @app.route('/home', strict_slashes=False)
 def home():
-    user = User(id=session['id'], username=session['username'], email=session['email'], password=session['password'])
     jobs = Job.query.all()
-    return render_template('home.html', jobs=jobs)
+    print(f"Number of jobs fetched: {len(jobs)}")
+
+    # Assumming there's a user logged in
+    user = None
+    if 'id' in session:
+         user = User.query.get(session['id'])
+
+    if user:
+        print(f"User logged in: {user.username}")
+    else:
+        print("No user logged in")
+
+    return render_template('home.html', jobs=jobs, user=user)
 
 @app.route('/about', strict_slashes=False)
 def about():
@@ -113,8 +124,13 @@ def login():
             session['loggedin'] = True
             session['id'] = account.id
             session['username'] = account.username
+            session['email'] = account.email
+            session['password'] = account.password
             msg = 'Logged in successfully !'
-            return render_template('home.html', msg = msg, user=account)
+            
+            #get all jobs from databse to be displayed
+            jobs = Job.query.all()
+            return render_template('home.html', msg = msg, user=account, jobs=jobs)
         else:
             msg = 'Incorrect username / password !'
     return render_template('login.html', msg = msg)
@@ -189,6 +205,20 @@ def add_job():
     
     new_job = Job(title=job_title, description=job_description)
     db.session.add(new_job)
+    db.session.commit()
+    
+    return redirect('/home')
+
+@app.route('/edit-job/<int:id>', methods=['PUT'])
+def edit_job(id):
+    job_to_edit = Job.query.get_or_404(id)
+    
+    job_title = request.form['title']
+    job_description = request.form['description']
+    
+    job_to_edit.title = job_title
+    job_to_edit.description = job_description
+    
     db.session.commit()
     
     return redirect('/home')
