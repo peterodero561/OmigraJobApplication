@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, flash, request, url_for, session
+from flask import Flask, render_template, redirect, flash, request, url_for, session, jsonify
 from flask_cors import CORS
 from flask_login import current_user, login_required
 from flask_mail import Mail, Message
@@ -10,6 +10,7 @@ from models.db import db
 from models.job import Job
 from models.user import User
 import re
+from werkzeug.security import generate_password_hash
 from werkzeug.utils import secure_filename
 
 
@@ -225,12 +226,100 @@ def edit_job(id):
 
 
 @app.route('/delete-job/<int:id>', methods=['POST'])
-def delete_job(id):
+def delete_job_redirect(id):
     job_to_delete = Job.query.get_or_404(id)
     db.session.delete(job_to_delete)
     db.session.commit()
     
     return redirect('/home')
+
+
+# API Endpoints
+
+# API for jobs endpoints
+@app.route('/api/jobs', methods=['GET'])
+def get_jobs():
+    '''Gets all jobs posted in the website'''
+    jobs = Job.query.all()
+    return jsonify([job.to_dict() for job in jobs])
+
+@app.route('/api/jobs/<int:id>', methods=['GET'])
+def get_job(id):
+    '''Gets a specific job given an id'''
+    job = Job.query.get_or_404(id)
+    return jsonify(job.to_dict())
+
+
+@app.route('/api/jobs', methods=['POST'])
+def create_job():
+    '''Creates a specific job'''
+    data = request.json
+    new_job = Job(title=data['title'], description=data['description'])
+    db.session.add(new_job)
+    db.session.commit()
+    return jsonify(new_job.to_dict()), 201
+
+
+@app.route('/api/jobs/<int:id>', methods=['PUT'])
+def update_job(id):
+    '''Updates a job with a specific id'''
+    job = Job.query.get_or_404(id)
+    data = request.json
+    job.title = data['title']
+    job.description = data['description']
+    db.session.commit()
+    return jsonify(job.to_dict())
+
+
+@app.route('/api/jobs/<int:id>', methods=['DELETE'])
+def delete_job_api(id):
+    job = Job.query.get_or_404(id)
+    db.session.delete(job)
+    db.session.commit()
+    return jsonify({'message': 'Job deleted'}), 204
+
+
+# API for user endpoints
+@app.route('/api/users', methods=['GET'])
+def get_users():
+    '''Get users registered to the website'''
+    users = User.query.all()
+    return jsonify([user.to_dict() for user in users])
+
+@app.route('/api/users/<int:id>', methods=['GET'])
+def get_user(id):
+    '''Gets a specifi user of the website'''
+    user = User.query.get_or_404(id)
+    return jsonify(user.to_dict())
+
+@app.route('/api/users', methods=['POST'])
+def create_user():
+    '''Creates a new user to the website'''
+    data = request.json
+    new_user = User(username='username', email=data['email'], password=generate_password_hash(data['password']))
+    db.session.add(new_user)
+    db.session.commit()
+    return jsonify(new_user.to_dict()), 201
+
+@app.route('/api/users/<int:id>', methods=['DELETE'])
+def delete_user(id):
+    '''Deletes a user by id'''
+    user = User.query.get_or_404(id)
+    db.session.delete(user)
+    db.session.commit()
+    return jsonify({'message': 'User deleted'}), 204
+
+@app.route('/api/users/<int:id>', methods=['PUT'])
+def update_user(id):
+    user = User.query.get_or_404(id)
+    data = request.json
+    user.username = data['username']
+    user.email = data['email']
+    if 'password' in data:
+        user.password = generate_password_hash(data['password'])
+
+    db.session.commit()
+    return jsonify(user.to_dict())
 
 
 
