@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Omigra Enterprise Recruitment</title>
+    <link rel="stylesheet" href="../static/styles/profile.css"> 
     <link rel="stylesheet" href="../static/styles/home.css">
 </head>
 <body>
@@ -13,7 +14,7 @@
                 {% if user.profile_pic %}
                     <img src="{{ url_for('static', filename=user.profile_pic) }}" alt="User Image" class="user-image">
                 {% else %}
-                    <img src="{{ url_for('static', filename='images/default-profile3.png') }}" alt="User Image" class="user-image">
+                    <img src="{{ url_for('static', filename='images/profile_pics/default-profile3.png') }}" alt="User Image" class="user-image">
                 {% endif %}
             </div> 
             
