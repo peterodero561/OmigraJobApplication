@@ -217,7 +217,7 @@ def update_information():
                 filename = secure_filename(profile_pic.filename)
                 profile_pic_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 profile_pic.save(profile_pic_path)
-                user.profile_pic = profile_pic_path
+                user.profile_pic = os.path.join('images/profile_pics', filename)
         
         # Update password
         if request.form.get('password') and request.form.get('confirm-password'):
@@ -229,7 +229,7 @@ def update_information():
         
         db.session.commit()
         flash("Your information has been updated successfully.")
-        return redirect(url_for('profile'))
+        return redirect(url_for('home'))
     
     flash("User not found.")
     return redirect(url_for('profile'))
