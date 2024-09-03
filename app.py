@@ -1,7 +1,8 @@
 from flask import Flask, render_template, redirect, flash, request, url_for, session, jsonify
 from flask_cors import CORS
-from flask_login import current_user, login_required
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_mail import Mail, Message
+from flask_migrate import Migrate
 from flask_mysqldb import MySQL
 from flask_sqlalchemy import SQLAlchemy
 import os
@@ -10,6 +11,7 @@ from models.db import db
 from models.job import Job
 from models.user import User
 import re
+from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash
 from werkzeug.utils import secure_filename
 
@@ -20,7 +22,7 @@ app = Flask(__name__)
 app.secret_key = 'Peter 1234'
 
 # configure picture upload
-UPLOAD_FOLDER = 'static/images/'
+UPLOAD_FOLDER = 'static/images/profile_pics'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
@@ -34,13 +36,24 @@ app.config['MAIL_USE_SSL'] = True
 
 mail = Mail(app)
 
+# Initialize Flask-Login
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
 # Configuration for the MySQL database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:Peterodero561%40@localhost/omigra'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Initialize the database with the app context
 db.init_app(app)
+migrate = Migrate(app, db) # Initialize Flask-Migrate
 
+
+# Initialize the database with the app context
 with app.app_context():
     db.create_all()  # Create tables if they don't exist
 
@@ -110,6 +123,7 @@ def applyHome():
     return render_template('apply.html')
 
 
+
 @app.route('/', strict_slashes=False)
 @app.route('/login', strict_slashes=False, methods =['GET', 'POST'])
 def login():
@@ -122,6 +136,7 @@ def login():
         account = User.query.filter_by(username=username).first()
 
         if account and account.check_password(password):
+            login_user(account)
             session['loggedin'] = True
             session['id'] = account.id
             session['username'] = account.username
@@ -144,7 +159,6 @@ def logout():
     return redirect(url_for('login'))
 
 
-
 @app.route('/register', strict_slashes=False, methods =['GET', 'POST'])
 def register():
     msg = ''
@@ -154,10 +168,14 @@ def register():
         email = request.form['email']
 
          # Check if account exists using SQLAlchemy
-        account = User.query.filter_by(username=username).first()
+         # Check if username or email already exists
+        existing_user = User.query.filter_by(username=username).first()
+        existing_email = User.query.filter_by(email=email).first()
 
-        if account:
-            msg = 'Account already exists !'
+        if existing_user:
+            msg = 'Username already exists !'
+        if existing_email:
+            msg = 'Email already exists !'
         elif not re.match(r'[^@]+@[^@]+\.[^@]+', email):
             msg = 'Invalid email address !'
         elif not re.match(r'[A-Za-z0-9]+', username):
@@ -165,34 +183,57 @@ def register():
         elif not username or not password or not email:
             msg = 'Please fill out the form !'
         else:
-            # Create a new user instance
-            new_user = User(username=username, password=password, email=email)
-            db.session.add(new_user)
-            db.session.commit()
-            msg = 'You have successfully registered !'
+            try:
+                # Hash the password before storing it
+                hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+                # Create a new user instance
+                new_user = User(username=username, password=hashed_password, email=email)
+                db.session.add(new_user)
+                db.session.commit()
+                msg = 'You have successfully registered!'
+            except IntegrityError:
+                db.session.rollback()
+                msg = 'An error occurred during registration. Please try again.'
     elif request.method == 'POST':
         msg = 'Please fill out the form !'
     return render_template('register.html', msg = msg)
 
 
-@app.route('/upload', methods=['POST'])
+@app.route('/update_information', methods=['POST'])
 @login_required
-def upload_file():
-    if 'profile_pic' not in request.files:
-        return "No file part"
-    file = request.files['profile_pic']
-    if file.filename == '':
-        return "No selected file"
-    if file:
-        filename = secure_filename(file.filename)
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(filepath)
+def update_information():
+    user = User.query.get(current_user.id)
 
-        # Update the user's profile picture path in the database
-        current_user.profile_pic = filepath
-        db.session.commit()
+    if user:
+        # update username, email, phone number
+        user.username = request.form.get('username')
+        user.email = request.form.get('email')
+        user.phone_no = request.form.get('phone')
         
+        # Update profile picture
+        if 'profile-pic' in request.files:
+            profile_pic = request.files['profile-pic']
+            if profile_pic.filename != '':
+                filename = secure_filename(profile_pic.filename)
+                profile_pic_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                profile_pic.save(profile_pic_path)
+                user.profile_pic = profile_pic_path
+        
+        # Update password
+        if request.form.get('password') and request.form.get('confirm-password'):
+            if request.form.get('password') == request.form.get('confirm-password'):
+                user.password = generate_password_hash(request.form.get('password'))
+            else:
+                flash("Passwords do not match.")
+                return redirect(url_for('profile'))
+        
+        db.session.commit()
+        flash("Your information has been updated successfully.")
         return redirect(url_for('profile'))
+    
+    flash("User not found.")
+    return redirect(url_for('profile'))
+    
 
 @app.route('/profile')
 @login_required
