@@ -186,9 +186,15 @@ footer {
     justify-content: flex-end;
 }
 
+/* Job buttons Styling */
+.jobButtons{
+    display: flex;
+    justify-content: space-between;
+}
 
 
-/* Dropdown styling */
+
+Dropdown styling
 .dropdown-container {
     position: relative;
 }
