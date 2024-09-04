@@ -112,15 +112,39 @@ def home():
 
 @app.route('/about', strict_slashes=False)
 def about():
-    return render_template('about.html')
+    user = None
+    if 'id' in session:
+         user = User.query.get(session['id'])
+
+    if user:
+        print(f"User logged in: {user.username}")
+    else:
+        print("No user logged in")
+    return render_template('about.html', user=user)
 
 @app.route('/contact', strict_slashes=False)
 def contact():
-    return render_template('contact.html')
+    user = None
+    if 'id' in session:
+         user = User.query.get(session['id'])
+
+    if user:
+        print(f"User logged in: {user.username}")
+    else:
+        print("No user logged in")
+    return render_template('contact.html', user=user)
 
 @app.route('/applyHome', strict_slashes=False)
 def applyHome():
-    return render_template('apply.html')
+    user = None
+    if 'id' in session:
+         user = User.query.get(session['id'])
+
+    if user:
+        print(f"User logged in: {user.username}")
+    else:
+        print("No user logged in")
+    return render_template('apply.html', user=user)
 
 
 
@@ -240,16 +264,36 @@ def update_information():
 def profile():
     return render_template('profile.html', user=current_user)
 
-@app.route('/add-job', methods=['POST'])
-def add_job():
-    job_title = request.form['title']
-    job_description = request.form['description']
-    
-    new_job = Job(title=job_title, description=job_description)
-    db.session.add(new_job)
-    db.session.commit()
-    
-    return redirect('/home')
+@app.route('/editApply/<int:job_id>', methods=['GET', 'POST'])
+@app.route('/add-job', methods=['GET', 'POST'])
+@login_required
+def add_or_edit_job(job_id=None):
+    job = Job.query.get(job_id) if job_id else None
+
+    if request.method == 'POST':
+        title = request.form.get('title')
+        description = request.form.get('description')
+
+        if job:
+            # Update the existing job
+            job.title = title
+            job.description = description
+            flash('Job updated successfully.')
+        else:
+            # Add a new job
+            new_job = Job(title=title, description=description, user_id=current_user.id)
+            db.session.add(new_job)
+            flash('Job added successfully.')
+
+        db.session.commit()
+        return redirect(url_for('home'))
+
+    return render_template('editApply.html', job=job)
+
+
+@app.route('/editApply')
+def editApply():
+    return render_template('editApply.html')
 
 @app.route('/edit-job/<int:id>', methods=['PUT'])
 def edit_job(id):
