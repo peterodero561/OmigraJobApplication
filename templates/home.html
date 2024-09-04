@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Omigra Enterprise Recruitment</title>
-    <link rel="stylesheet" href="../static/styles/profile.css"> 
+    <link rel="stylesheet" href="../static/styles/profile.css">  
     <link rel="stylesheet" href="../static/styles/home.css">
 </head>
 <body>
@@ -43,25 +43,23 @@
                     <h2>{{ job.title }}</h2>
                     <p>Job Description: {{ job.description }}</p>
                     <div class="jobButtons">
-                    <!-- Edit Job Form -->
-                    <form action="/edit-job/{{ job.id }}" method="POST">
-                        <button type="submit">Edit</button>
-                    </form>
-
-                    <!-- Delete Job Form -->
-                    <form action="/delete-job/{{ job.id }}" method="POST">
-                        <button type="submit">Delete</button>
-                    </form>
-                    <button onclick="applyForJob('{{ job.title }}')">Apply</button>
+                        <!-- Edit Job Button -->
+                        <form action="{{ url_for('add_or_edit_job', job_id=job.id) }}">
+                            <button type="submit">Edit</button>
+                        </form>
+        
+                        <!-- Delete Job Form -->
+                        <form action="{{ url_for('delete_job_redirect', id=job.id) }}" method="POST">
+                            <button type="submit">Delete</button>
+                        </form>
+        
+                        <!-- Apply for Job Button -->
+                        <button onclick="applyForJob('{{ job.title }}')">Apply</button>
                     </div>
                 </div>
             {% endfor %}
         </section>
-        <form action="/add-job" method="POST" class="job-form">
-            <input type="text" name="title" placeholder="Job Title" required>
-            <textarea name="description" placeholder="Job Description" required></textarea>
-            <button type="submit">Add Job</button>
-        </form> 
+        
     </main>
     <footer>
         <p>Contact us: +97450075368 or 0741715502 | Email: absalomominde1@gmail.com</p>
