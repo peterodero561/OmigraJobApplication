@@ -6,13 +6,6 @@ body {
     color: #333;
 }
 
-header {
-    background-color: #333;
-    color: #fff;
-    padding: 10px 0;
-    text-align: center;
-}
-
 main {
     padding: 20px;
 }
@@ -73,4 +66,41 @@ footer {
     position: bottom;
     width: 100%;
     bottom: 0;
+}
+
+
+/* Header Styling */
+header {
+    background-color: #333;
+    color: #fff;
+    padding: 10px 0;
+    text-align: center;
+}
+
+.header-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.back-button {
+    position: absolute;
+    left: 0;
+    background-color: transparent;
+    border: none;
+    color: #fff; /* Button color */
+    cursor: pointer;
+    font-size: 40px; /* Size of the arrow */
+    padding: 0;
+    margin-right: 10px; /* Space between button and the h1 */
+    margin-left: 10px; /*Space btwn border and back button*/
+    margin-bottom: 10px;
+}
+
+h1 {
+    margin: 0;
+    font-size: 24px;
+    text-align: center;
+    flex-grow: 1;
 }
