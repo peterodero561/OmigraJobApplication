@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Omigra Enterprise Recruitment</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel="stylesheet" href="../static/styles/editApply.css">
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <button onclick="goBack()" class="back-button">&larr;</button>
+            <h1>Apply for Job at Omigra Enterprise</h1>
+        </div>
+    </header>
+
+    <form action="{{ '/editApply/' ~ job.id if job else '/add-job' }}" method="POST" class="job-form">
+        <input type="text" name="title" placeholder="Job Title" value="{{ job.title if job else '' }}" required>
+        <textarea name="description" placeholder="Job Description" required>{{ job.description if job else '' }}</textarea>
+        <button type="submit">{{ 'Update Job' if job else 'Add Job' }}</button>
+    </form>
+    
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+</body>
+</html>
