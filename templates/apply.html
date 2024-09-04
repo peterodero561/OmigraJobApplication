@@ -8,7 +8,10 @@
 </head>
 <body>
     <header>
-        <h1>Apply for Job at Omigra Enterprise</h1>
+        <div class="header-container">
+            <button onclick="goBack()" class="back-button">&larr;</button>
+            <h1>Apply for Job at Omigra Enterprise</h1>
+        </div>
     </header>
     <main>
         <section id="apply-section">
@@ -45,6 +48,10 @@
         
         // Display the job title in the apply form
         document.getElementById('job-title').textContent = jobTitle || 'Apply for Job';
+        function goBack() {
+            window.history.back();
+        }
+    </script>
     </script>
 </body>
 </html>
