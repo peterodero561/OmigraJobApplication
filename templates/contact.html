@@ -5,18 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact Us - Omigra Enterprise</title>
     <link rel="stylesheet" href="../static/styles/contact.css">
+    <link rel="stylesheet" href="../static/styles/profile.css">  
+    <link rel="stylesheet" href="../static/styles/home.css">
 </head>
 <body>
     <header>
-        <h1>Omigra Enterprise Recruitment</h1>
-        <nav>
-            <ul>
-                <li><a href="/home">Home</a></li>
-                <li><a href="#jobs">Jobs</a></li>
-                <li><a href="/about">About Us</a></li>
-                <li><a href="/contact">Contact Us</a></li>
-            </ul>
-        </nav>
+        <div class="header-container">
+            <div class="user-info">
+                {% if user.profile_pic %}
+                    <img src="{{ url_for('static', filename=user.profile_pic) }}" alt="User Image" class="user-image">
+                {% else %}
+                    <img src="{{ url_for('static', filename='images/profile_pics/default-profile3.png') }}" alt="User Image" class="user-image">
+                {% endif %}
+            </div> 
+            
+            <div class="heading">
+                <h1>Omigra Enterprise Recruitment</h1>
+            </div>
+
+
+            <!-- Dropdown Menu -->
+            <div class="dropdown-container">
+                <button class="dropdown-btn">Menu</button>
+                <div class="dropdown-content">
+                    <a href="/profile">Profile</a>
+                    <a href="/home">Home</a>
+                    <a href="/about">About Us</a>
+                    <a href="/contact">Contact Us</a>
+                    <a href="/logout">Logout</a>
+                </div>
+            </div>
+        </div>
     </header>
     <main>
         <section id="contact">
