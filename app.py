@@ -12,7 +12,7 @@ from models.job import Job
 from models.user import User
 import re
 from sqlalchemy.exc import IntegrityError
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
 
@@ -92,6 +92,28 @@ def apply():
             return redirect('/home')
     return render_template('apply.html')
 
+@app.route('/contactMessage', strict_slashes=False, methods=['GET', 'POST'])
+def contactMessage():
+    if request.method == 'POST':
+        name = request.form['name']
+        email = request.form['email']
+        message = request.form['message']
+
+        # email the message
+        msg = Message(subject=f'Contact from {name}', sender='peterodero561@gmail.com', recipients=['peterodero561@gmail.com'])
+        msg.body = f"""
+        Name: {name}
+        email: {email}
+        Message: {message}
+        """
+
+        try:
+            mail.send(msg)
+            print('Message submitted succsefuly')
+            return render_template('home.html')
+        except Exception as e:
+            print(f'Failed to send message: {str(e)}')
+
 
 @app.route('/home', strict_slashes=False)
 def home():
@@ -151,6 +173,7 @@ def applyHome():
 @app.route('/', strict_slashes=False)
 @app.route('/login', strict_slashes=False, methods =['GET', 'POST'])
 def login():
+    session.clear()  # Clear any existing session data
     msg = ''
     if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
         username = request.form['username']
@@ -159,13 +182,15 @@ def login():
          # Query the user using SQLAlchemy
         account = User.query.filter_by(username=username).first()
 
-        if account and account.check_password(password):
+        print(account.to_dict())
+
+        if account and check_password_hash(account.password, password):
             login_user(account)
             session['loggedin'] = True
             session['id'] = account.id
             session['username'] = account.username
             session['email'] = account.email
-            session['password'] = account.password
+            # session['password'] = account.password
             msg = 'Logged in successfully !'
             
             #get all jobs from databse to be displayed
@@ -208,20 +233,17 @@ def register():
             msg = 'Please fill out the form !'
         else:
             try:
-                # Hash the password before storing it
-                hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
                 # Create a new user instance
-                new_user = User(username=username, password=hashed_password, email=email)
+                new_user = User(username=username, password=password, email=email)
                 db.session.add(new_user)
                 db.session.commit()
                 msg = 'You have successfully registered!'
             except IntegrityError:
                 db.session.rollback()
-                msg = 'An error occurred during registration. Please try again.'
+                msg = 'An Intergity error occurred during registration. Please try again, with unique details'
     elif request.method == 'POST':
         msg = 'Please fill out the form !'
     return render_template('register.html', msg = msg)
-
 
 @app.route('/update_information', methods=['POST'])
 @login_required
