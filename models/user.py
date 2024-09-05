@@ -15,7 +15,7 @@ class User(UserMixin, db.Model):
         self.username = username
         self.email = email
         self.id = id
-        self.password = generate_password_hash(password)
+        self.password = generate_password_hash(password, method='pbkdf2:sha256')
 
     def check_password(self, password):
         return check_password_hash(self.password, password)
@@ -29,5 +29,6 @@ class User(UserMixin, db.Model):
             'username':self.username,
             'email': self.email,
             'profile_pic': self.profile_pic,
-            'phone_no': self.phone_no
+            'phone_no': self.phone_no,
+            'password': self.password
         }
