@@ -23,7 +23,7 @@
     
     <script>
         function goBack() {
-            window.history.back();
+            window.location.href = document.referrer;  // This avoids the form resubmission error
         }
     </script>
 </body>
