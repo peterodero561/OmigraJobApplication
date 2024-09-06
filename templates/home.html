@@ -37,12 +37,18 @@
         </div>
     </header>
     <main>
+        <!-- Add Job Button for Admin -->
+        <div class="add-job-container">
+            <a href="/add-job" class="add-job-btn">Add Job</a>
+        </div>
+        
         <section id="jobs">
             {% for job in jobs %}
                 <div class="job">
                     <h2>{{ job.title }}</h2>
                     <p>Job Description: {{ job.description }}</p>
                     <div class="jobButtons">
+
                         <!-- Edit Job Button -->
                         <form action="{{ url_for('add_or_edit_job', job_id=job.id) }}">
                             <button type="submit">Edit</button>
@@ -53,8 +59,6 @@
                             <button type="submit">Delete</button>
                         </form>
         
-                        <!-- Apply for Job Button -->
-                        <button onclick="applyForJob('{{ job.title }}')">Apply</button>
                     </div>
                 </div>
             {% endfor %}
