@@ -59,6 +59,7 @@ with app.app_context():
 
 
 @app.route('/apply', methods=['POST', 'GET'], strict_slashes=False)
+@login_required
 def apply():
     if request.method == 'POST':
         name = request.form['name']
@@ -93,6 +94,7 @@ def apply():
     return render_template('apply.html')
 
 @app.route('/contactMessage', strict_slashes=False, methods=['GET', 'POST'])
+@login_required
 def contactMessage():
     if request.method == 'POST':
         name = request.form['name']
@@ -109,14 +111,21 @@ def contactMessage():
 
         try:
             mail.send(msg)
-            print('Message submitted succsefuly')
-            return render_template('home.html')
+            flash('Message submitted succsefuly', 'success')
+            return redirect(url_for('contact'))
         except Exception as e:
             print(f'Failed to send message: {str(e)}')
+            flash('Failed to send message. Please try again later.', 'error')
+            return render_template('contact.html', user=current_user)
+        
+    else:
+        flash('Fill out the form.', 'error')
+        return render_template('contact.html', user=current_user)
 
 
-@app.route('/home', strict_slashes=False)
-def home():
+@app.route('/homeAdmin', strict_slashes=False)
+@login_required
+def homeAdmin():
     jobs = Job.query.all()
     print(f"Number of jobs fetched: {len(jobs)}")
 
@@ -132,7 +141,26 @@ def home():
 
     return render_template('home.html', jobs=jobs, user=user)
 
+@app.route('/homeUser', strict_slashes=False)
+@login_required
+def homeUser():
+    jobs = Job.query.all()
+    print(f"Number of jobs fetched: {len(jobs)}")
+
+    # Assumming there's a user logged in
+    user = None
+    if 'id' in session:
+         user = User.query.get(session['id'])
+
+    if user:
+        print(f"User logged in: {user.username}")
+    else:
+        print("No user logged in")
+
+    return render_template('home2.html', jobs=jobs, user=user)
+
 @app.route('/about', strict_slashes=False)
+@login_required
 def about():
     user = None
     if 'id' in session:
@@ -145,6 +173,7 @@ def about():
     return render_template('about.html', user=user)
 
 @app.route('/contact', strict_slashes=False)
+@login_required
 def contact():
     user = None
     if 'id' in session:
@@ -157,6 +186,7 @@ def contact():
     return render_template('contact.html', user=user)
 
 @app.route('/applyHome', strict_slashes=False)
+@login_required
 def applyHome():
     user = None
     if 'id' in session:
@@ -182,8 +212,6 @@ def login():
          # Query the user using SQLAlchemy
         account = User.query.filter_by(username=username).first()
 
-        print(account.to_dict())
-
         if account and check_password_hash(account.password, password):
             login_user(account)
             session['loggedin'] = True
@@ -195,7 +223,10 @@ def login():
             
             #get all jobs from databse to be displayed
             jobs = Job.query.all()
-            return render_template('home.html', msg = msg, user=account, jobs=jobs)
+            if account.username == 'peterAdmin':
+                return render_template('home.html', msg = msg, user=account, jobs=jobs)
+            else:
+                return render_template('home2.html', msg = msg, user=account, jobs=jobs)
         else:
             msg = 'Incorrect username / password !'
     return render_template('login.html', msg = msg)
@@ -314,6 +345,7 @@ def add_or_edit_job(job_id=None):
 
 
 @app.route('/editApply')
+@login_required
 def editApply():
     return render_template('editApply.html')
 
