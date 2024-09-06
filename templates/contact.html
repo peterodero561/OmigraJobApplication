@@ -38,12 +38,21 @@
         </div>
     </header>
     <main>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
         <section id="contact">
             <h2>Contact Us</h2>
-            <p>For any inquiries, please contact us:</p>
+            <p>For any inquiries, please contact us:</p> 
             <p>Phone: +97450075368 or 0741715502</p>
             <p>Email: <a href="mailto:absalomominde1@gmail.com">absalomominde1@gmail.com</a></p>
-            <form id="contact-form" action="/contactMessage" enctype="multipart/form-data">
+            <form id="contact-form" action="/contactMessage" enctype="multipart/form-data" method="POST">
                 <label for="name">Name:</label>
                 <input type="text" id="name" name="name" required>
                 <label for="email">Email:</label>
