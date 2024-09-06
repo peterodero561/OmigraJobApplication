@@ -130,3 +130,18 @@ footer {
 #contact-form button:hover {
     background-color: #0056b3;
 }
+
+
+/* CSS for flash messages */
+.flashes {
+    list-style-type: none;
+    padding: 0;
+}
+
+.flashes li.success {
+    color: green;
+}
+
+.flashes li.error {
+    color: red;
+}
