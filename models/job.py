@@ -8,6 +8,8 @@ class Job(db.Model):
     description = db.Column(db.Text, nullable=False)
     date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
+    __table_args__ = {'extend_existing': True}
+
     def __repr__(self):
         return f'<Job {self.title}>'
     
