@@ -11,6 +11,8 @@ class User(UserMixin, db.Model):
     profile_pic = db.Column(db.String(100), nullable=True)
     phone_no = db.Column(db.String(50), nullable=True)
 
+    __table_args__ = {'extend_existing': True}
+
     def __init__(self, username, email, password, id=None):
         self.username = username
         self.email = email
