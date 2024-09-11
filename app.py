@@ -90,7 +90,13 @@ def apply():
             except Exception as e:
                 flash(f'Flaied to send application: {str(e)}', 'danger')
 
-            return redirect('/home')
+            # Assumming there's a user logged in
+            user = None
+            if 'id' in session:
+                user = User.query.get(session['id'])
+            
+
+            return render_template('home.html', user=user, jobs=Job.query.all())
     return render_template('apply.html')
 
 @app.route('/contactMessage', strict_slashes=False, methods=['GET', 'POST'])
@@ -306,7 +312,7 @@ def update_information():
         
         db.session.commit()
         flash("Your information has been updated successfully.")
-        return redirect(url_for('home'))
+        return redirect(url_for('homeAdmin'))
     
     flash("User not found.")
     return redirect(url_for('profile'))
@@ -334,12 +340,12 @@ def add_or_edit_job(job_id=None):
             flash('Job updated successfully.')
         else:
             # Add a new job
-            new_job = Job(title=title, description=description, user_id=current_user.id)
+            new_job = Job(title=title, description=description)
             db.session.add(new_job)
             flash('Job added successfully.')
 
         db.session.commit()
-        return redirect(url_for('home'))
+        return redirect(url_for('homeAdmin'))
 
     return render_template('editApply.html', job=job)
 
@@ -349,20 +355,6 @@ def add_or_edit_job(job_id=None):
 def editApply():
     return render_template('editApply.html')
 
-@app.route('/edit-job/<int:id>', methods=['PUT'])
-def edit_job(id):
-    job_to_edit = Job.query.get_or_404(id)
-    
-    job_title = request.form['title']
-    job_description = request.form['description']
-    
-    job_to_edit.title = job_title
-    job_to_edit.description = job_description
-    
-    db.session.commit()
-    
-    return redirect('/home')
-
 
 @app.route('/delete-job/<int:id>', methods=['POST'])
 def delete_job_redirect(id):
@@ -370,7 +362,7 @@ def delete_job_redirect(id):
     db.session.delete(job_to_delete)
     db.session.commit()
     
-    return redirect('/home')
+    return redirect(url_for('homeAdmin'))
 
 
 # API Endpoints
