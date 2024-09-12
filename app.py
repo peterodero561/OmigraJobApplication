@@ -3,10 +3,8 @@ from flask_cors import CORS
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_mail import Mail, Message
 from flask_migrate import Migrate
-from flask_mysqldb import MySQL
 from flask_sqlalchemy import SQLAlchemy
 import os
-import MySQLdb.cursors
 from models.db import db
 from models.job import Job
 from models.user import User
