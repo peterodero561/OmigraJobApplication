@@ -27,7 +27,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # Configure mail
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
-app.config['MAIL_USERNAME'] = 'peterodero561@gmail.com'
+app.config['MAIL_USERNAME'] = 'pete561odero@gmail.com'
 app.config['MAIL_PASSWORD'] = os.getenv('Password')
 app.config['MAIL_USE_TSL'] = False
 app.config['MAIL_USE_SSL'] = True
@@ -49,7 +49,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
 migrate = Migrate(app, db) # Initialize Flask-Migrate
-
+ 
 
 # Initialize the database with the app context
 with app.app_context():
@@ -70,8 +70,8 @@ def apply():
         # Email
         if resume:
             msg = Message(subject=f'New Job Application from {name}',
-                    sender='peterodero561@gmail.com',
-                    recipients=['peterodero561@gmail.com'])
+                    sender='pete561odero@gmail.com',
+                    recipients=['pete561odero@gmail.com'])
             msg.body = f"""
             Name: {name}
             Email: {email}
@@ -84,7 +84,7 @@ def apply():
 
             try:
                 mail.send(msg)
-                flash('Application submitted successfully!', 'success')
+                print('Application submitted successfully!')
             except Exception as e:
                 flash(f'Flaied to send application: {str(e)}', 'danger')
 
@@ -93,8 +93,10 @@ def apply():
             if 'id' in session:
                 user = User.query.get(session['id'])
             
-
-            return render_template('home.html', user=user, jobs=Job.query.all())
+            if user.username.strip().lower() == 'peteradmin':
+                return render_template('home.html', user=user, jobs=Job.query.all())
+            else:
+                return render_template('home2.html', user=user, jobs=Job.query.all())
     return render_template('apply.html')
 
 @app.route('/contactMessage', strict_slashes=False, methods=['GET', 'POST'])
@@ -106,7 +108,7 @@ def contactMessage():
         message = request.form['message']
 
         # email the message
-        msg = Message(subject=f'Contact from {name}', sender='peterodero561@gmail.com', recipients=['peterodero561@gmail.com'])
+        msg = Message(subject=f'Contact from {name}', sender='pete561odero@gmail.com', recipients=['pete561odero@gmail.com'])
         msg.body = f"""
         Name: {name}
         email: {email}
@@ -138,10 +140,10 @@ def homeAdmin():
     if 'id' in session:
          user = User.query.get(session['id'])
 
-    if user:
-        print(f"User logged in: {user.username}")
-    else:
-        print("No user logged in")
+    # if user:
+    #     #print(f"User logged in: {user.username}")
+    # else:
+    #     #print("No user logged in")
 
     return render_template('home.html', jobs=jobs, user=user)
 
@@ -156,10 +158,10 @@ def homeUser():
     if 'id' in session:
          user = User.query.get(session['id'])
 
-    if user:
-        print(f"User logged in: {user.username}")
-    else:
-        print("No user logged in")
+    # if user:
+    #     #print(f"User logged in: {user.username}")
+    # else:
+    #     #print("No user logged in")
 
     return render_template('home2.html', jobs=jobs, user=user)
 
@@ -170,10 +172,10 @@ def about():
     if 'id' in session:
          user = User.query.get(session['id'])
 
-    if user:
-        print(f"User logged in: {user.username}")
-    else:
-        print("No user logged in")
+    # if user:
+    #     #print(f"User logged in: {user.username}")
+    # else:
+    #     #print("No user logged in")
     return render_template('about.html', user=user)
 
 @app.route('/contact', strict_slashes=False)
@@ -183,10 +185,10 @@ def contact():
     if 'id' in session:
          user = User.query.get(session['id'])
 
-    if user:
-        print(f"User logged in: {user.username}")
-    else:
-        print("No user logged in")
+    # if user:
+    #     #print(f"User logged in: {user.username}")
+    # else:
+    #     #print("No user logged in")
     return render_template('contact.html', user=user)
 
 @app.route('/applyHome', strict_slashes=False)
@@ -196,10 +198,10 @@ def applyHome():
     if 'id' in session:
          user = User.query.get(session['id'])
 
-    if user:
-        print(f"User logged in: {user.username}")
-    else:
-        print("No user logged in")
+    # if user:
+    #     #print(f"User logged in: {user.username}")
+    # else:
+    #     #print("No user logged in")
     return render_template('apply.html', user=user)
 
 
@@ -227,12 +229,14 @@ def login():
             
             #get all jobs from databse to be displayed
             jobs = Job.query.all()
-            if account.username == 'peterAdmin':
+            if account.username.strip().lower() == 'peteradmin':
                 return render_template('home.html', msg = msg, user=account, jobs=jobs)
             else:
                 return render_template('home2.html', msg = msg, user=account, jobs=jobs)
+        elif account:
+            msg = 'Incorrect password !'
         else:
-            msg = 'Incorrect username / password !'
+            msg = 'Account does not exist!!'
     return render_template('login.html', msg = msg)
 
 @app.route('/logout')
@@ -272,7 +276,7 @@ def register():
                 new_user = User(username=username, password=password, email=email)
                 db.session.add(new_user)
                 db.session.commit()
-                msg = 'You have successfully registered!'
+                msg = 'You have successfully registered. Procced to Sign in'
             except IntegrityError:
                 db.session.rollback()
                 msg = 'An Intergity error occurred during registration. Please try again, with unique details'
