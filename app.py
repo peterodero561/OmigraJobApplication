@@ -309,12 +309,16 @@ def update_information():
             if request.form.get('password') == request.form.get('confirm-password'):
                 user.password = generate_password_hash(request.form.get('password'))
             else:
-                flash("Passwords do not match.")
+                flash("Passwords do not match.", "error")
                 return redirect(url_for('profile'))
         
         db.session.commit()
         flash("Your information has been updated successfully.")
-        return redirect(url_for('homeAdmin'))
+        if user.username.strip().lower() == 'peteradmin':
+            return redirect(url_for('homeAdmin'))
+        else:
+            return redirect(url_for('homeUser'))
+        
     
     flash("User not found.")
     return redirect(url_for('profile'))
