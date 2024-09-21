@@ -161,3 +161,16 @@ button[type="submit"]:hover {
 .dark-mode .dropdown-content a:hover {
     background-color: #333;
 }
+
+
+.flash-messages {
+    margin-bottom: 15px;
+}
+
+.flash.error {
+    color: red;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 10px;
+    border-radius: 5px;
+}
