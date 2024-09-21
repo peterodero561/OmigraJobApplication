@@ -34,6 +34,18 @@
     <main>
         <div class="settings-container">
             <h2>User Settings</h2>
+
+            <!-- Flash message block -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <p class="flash {{ category }}">{{ message }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
             <form id="settings-form" action="/update_information", method="POST", enctype="multipart/form-data">
                 <div class="form-group">
                     <label for="username">Username</label>
